@@ -3,13 +3,12 @@ import org.gradle.api.initialization.resolve.RepositoriesMode
 // CI 跑在美西的 GitHub runner 上：Maven Central 对它返回 403，阿里云镜像对较新的
 // 版本（如 KSP 2.3.6）会 404。补一个谷歌托管的 Central 全量镜像兜底，放在阿里云之后，
 // 国内本地构建仍然优先走阿里云。
-val centralMirror = "https://maven-central.storage-download.googleapis.com/maven2/"
-
+// 注意：pluginManagement 是分阶段单独编译的，看不到脚本顶层的 val，这里只能写字面量。
 pluginManagement {
     repositories {
         google()
         maven("https://maven.aliyun.com/repository/public")
-        maven(centralMirror)
+        maven("https://maven-central.storage-download.googleapis.com/maven2/")
         gradlePluginPortal()
         mavenCentral()
     }
@@ -21,7 +20,7 @@ dependencyResolutionManagement {
         google()
         maven("https://maven.aliyun.com/repository/public")
         maven("https://jitpack.io")
-        maven(centralMirror)
+        maven("https://maven-central.storage-download.googleapis.com/maven2/")
         mavenCentral()
     }
 }
