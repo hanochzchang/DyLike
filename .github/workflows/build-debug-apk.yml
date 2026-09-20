@@ -45,6 +45,20 @@ jobs:
       - name: Build prodDebug APK
         run: ./gradlew :dy-player:assembleProdDebug --stacktrace
 
+      # 仅构建失败时跑：把 runner 到各仓库的真实可达性打出来，省得靠猜
+      - name: Probe repositories
+        if: failure()
+        run: |
+          P="com/google/devtools/ksp/com.google.devtools.ksp.gradle.plugin/2.3.6/com.google.devtools.ksp.gradle.plugin-2.3.6.pom"
+          for base in \
+            "https://maven.aliyun.com/repository/public" \
+            "https://maven-central.storage-download.googleapis.com/maven2" \
+            "https://repo.maven.apache.org/maven2" \
+            "https://dl.google.com/dl/android/maven2" ; do
+            printf '%-62s ' "$base"
+            curl -s -o /dev/null -w 'http=%{http_code} time=%{time_total}s\n' -m 30 "$base/$P" || echo "curl exit $?"
+          done
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

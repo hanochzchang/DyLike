@@ -7,6 +7,8 @@ pluginManagement {
         google()
         maven("https://maven.aliyun.com/repository/gradle-plugin")
         maven("https://maven.aliyun.com/repository/public")
+        // 同根构建：CI 上 Maven Central 403、阿里云对较新版本 404，用谷歌镜像兜底
+        maven("https://maven-central.storage-download.googleapis.com/maven2/")
         gradlePluginPortal()
         mavenCentral()
     }
