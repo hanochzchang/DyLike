@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build-debug:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -22,8 +22,16 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # 不要引入 android-actions/setup-android：它内部会执行 `sdkmanager tools`，
+      # 而 Google 已从 SDK 仓库移除 `tools` 包，该步骤必然 exit 1。
+      # ubuntu-24.04 镜像自带 android-36 platform、build-tools 36.0.0、NDK 27.3，
+      # 唯独缺 player-exo/build.gradle.kts 里写死的 CMake 3.22.1，这里单独补上。
+      - name: Install CMake 3.22.1 required by player-exo
+        run: |
+          SDKMANAGER=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
+          echo "sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --install "cmake;3.22.1"
+          ls "$ANDROID_HOME/cmake"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
