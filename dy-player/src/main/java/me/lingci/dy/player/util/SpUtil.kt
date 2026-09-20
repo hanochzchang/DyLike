@@ -143,7 +143,7 @@ open class SpUtil(context: Context) : SpBase(context) {
 
     var showSysBar by SPManager.boolean(true)
 
-    var shortLifeSpeed by SPManager.float(0.5f)
+    var shortLifeSpeed by SPManager.float(2.0f)
 
     var shortRightSpeed by SPManager.float(2.0f)
 

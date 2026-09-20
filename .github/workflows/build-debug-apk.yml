@@ -1,0 +1,45 @@
+name: Build Debug APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-debug:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # gradlew 在 git 索引里是 100644，没有可执行位，直接 ./gradlew 会 Permission denied
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # local.properties 未提交，BUGLY_APP_ID / AES_KEY / AES_IV 走空字符串兜底，
+      # Android SDK 位置由 ANDROID_HOME 提供，无需 sdk.dir
+      - name: Build prodDebug APK
+        run: ./gradlew :dy-player:assembleProdDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DyLike-prodDebug
+          path: dy-player/build/outputs/apk/**/*.apk
+          if-no-files-found: error

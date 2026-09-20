@@ -29,7 +29,7 @@ object PlayerInitializer {
         var pressVideoSpeed: Float = 3f
         var isAutoPlayNext = true
 
-        var shortLeftSpeed = 0.5f
+        var shortLeftSpeed = 2f
         var shortRightSpeed  = 2f
         var shortShowLike = true
         var shortShowComment = true
