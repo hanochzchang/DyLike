@@ -75,6 +75,15 @@ jobs:
                   | head -c 1200 | sed ':a;N;$!ba;s/\n/%0A/g')
             echo "::error title=gradle::$msg"
           fi
+          # Gradle 自己发了哪些请求、收到什么回应：--info 会打印 Resource missing/not found
+          ./gradlew help --info 2>&1 \
+            | grep -iE "ksp|Resource missing|Resource not found|Could not GET|Could not HEAD|aliyun|storage-download|repo\.maven|dl\.google" \
+            | head -40 > resolve-trace.txt || true
+          if [ -s resolve-trace.txt ]; then
+            echo "::error title=resolve-trace::$(head -c 1500 resolve-trace.txt | sed ':a;N;$!ba;s/\n/%0A/g')"
+          else
+            echo "::error title=resolve-trace::(empty; gradlew help 也没输出相关行)"
+          fi
           {
             echo "### repo-probe"
             echo '```'
