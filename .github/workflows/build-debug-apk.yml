@@ -12,6 +12,12 @@ jobs:
   build-debug:
     runs-on: ubuntu-24.04
 
+    # runner 在美西：maven.aliyun.com 会返回 502，Gradle 重试三次后判整个 plugin
+    # classpath 解析失败（表现为 "KSP not found"），所以 CI 上跳过阿里云，
+    # 改走 settings.gradle.kts 里配的谷歌托管 Central 镜像。
+    env:
+      GRADLE_SKIP_ALIYUN: '1'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
