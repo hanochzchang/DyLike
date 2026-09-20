@@ -3,10 +3,12 @@ name: Build Debug APK
 on:
   push:
     branches: [main]
+    tags: ['v*']
   workflow_dispatch:
 
+# 打 v* tag 时要建 Release，需要 contents: write
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-debug:
@@ -107,3 +109,19 @@ jobs:
           name: DyLike-prodDebug
           path: dy-player/build/outputs/apk/**/*.apk
           if-no-files-found: error
+
+      # 只有打 v* tag 时才建 Release：APK 直接挂在 Release 页上，不用登录就能下载。
+      # main 的普通推送仍然只产出 Actions Artifacts。
+      # 用 find 收集而不是写 glob——Actions 的默认 bash 没开 globstar，** 会被当成单层 *，
+      # 匹配不到 apk/prod/debug/*.apk 这种两层目录。
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mapfile -t apks < <(find dy-player/build/outputs/apk -name '*.apk')
+          printf '%s\n' "${apks[@]}"
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            "${apks[@]}"
