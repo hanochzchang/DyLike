@@ -40,6 +40,13 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      # setup-gradle 连解析元数据缓存一起还原，里面会带着「这个包找不到」的负面结论
+      # （早先阿里云从美国 IP 访问是 502、Maven Central 是 403，那时确实找不到）。
+      # 缓存命中后 Gradle 不再发请求，直接报 not found，哪怕镜像里其实有。
+      # 只清元数据，已下载的 jar（modules-2/files-2.1）保留。
+      - name: Drop stale Gradle resolution metadata
+        run: rm -rf "$GRADLE_USER_HOME"/caches/modules-2/metadata-* "$GRADLE_USER_HOME"/caches/*/resource-at-url*
+
       # local.properties 未提交，BUGLY_APP_ID / AES_KEY / AES_IV 走空字符串兜底，
       # Android SDK 位置由 ANDROID_HOME 提供，无需 sdk.dir
       - name: Build prodDebug APK
